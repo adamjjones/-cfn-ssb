@@ -1,4 +1,16 @@
-When I installed Wordpress, it installed a database for me.
+To create the RDS database, I clicked the LaunchDB instances button. From there I selected the Database technology (MariaDB).
+
+After that, it will ask about use case and I chose the Dev/Test option.
+
+Then, I specify the license model DB engine version, Which i chose the default.
+the DB instance class I chose the db.t2.micro with 1 CPU and 1GB of RAM.
+I also chose a 20 SSD for storage, which was default and I named it capstone-db
+
+The last page of the form asked about the VPC, subnet, accessability, database port, encrytption, backup, monitoring, logging and maintenance.
+
+I chose my only and default VPC. The subnet group I left default and made the database pub;ically accessable. My availability zone is us-east-1a. The default port for MariaDB id 3306. The t2.micro instance does not support encryption. I chose 7 days for a backup period. I did not enable enhanced monitoring. I only wanted to see the error logs. I disable auto minor version upgrade and the maintenance window, I set to no preference.
+
+When I installed Wordpress, it populated the database for me.
 
 Here is the schema:
 
