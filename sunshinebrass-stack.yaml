@@ -2,9 +2,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Scalable Wordpress instance
 Resources:
-  #
-  # creating the security group
-  #
   WordPressAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
