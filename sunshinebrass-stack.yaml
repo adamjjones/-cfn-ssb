@@ -90,21 +90,10 @@ Resources:
             chkconfig httpd --level 2345 on && service httpd start
             #/opt/aws/bin/cfn-init -v --stack wordpress --resource WordPressLaunchConfig --region us-east-1
             #/opt/aws/bin/cfn-signal -e $? --stack wordpress--resource WordpressAutoScalingGroup --region us-east-1
-
-  WordPressHttpTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      HealthCheckIntervalSeconds: '15'
-      HealthCheckPath: "/"
-      HealthCheckPort: '80'
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 10
-      HealthyThresholdCount: 3
-      Port: 80
-      Protocol: HTTP
-      UnhealthyThresholdCount: 5
-      VpcId: vpc-e1e73b99
+  #
   # here is the load balacner
+  # The 3 subnets defines different availabilty zone and these are the subnets that were in my VPC.
+  # 
   WordPressLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -125,6 +114,22 @@ Resources:
       LoadBalancerArn:
         Ref: WordPressLoadBalancer
       Port: 80
+    #    
+    # This is how to tell if the EC2 instances can handle requests.
+    #
+  WordPressHttpTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: '15'
+      HealthCheckPath: "/"
+      HealthCheckPort: '80'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: vpc-e1e73b99
       Protocol: HTTP
   #
   # creating the security group
