@@ -98,21 +98,6 @@ Resources:
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: vpc-e1e73b99
-#  WordPressLoadBalancerHttpListenerRule:
-#    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
-#    Properties:
-#      Actions:
-#      - Type: forward
-#        TargetGroupArn:
-#          Ref: WordPressHttpTargetGroup
-#      Conditions:
-#        - 
-#          Field: 'host-header'
-#          Values:
-#          - "new.sunshinebrass.com"
-#      ListenerArn:
-#        Ref: WordPressHttpListener
-#      Priority: 1
   # here is the load balacner
   WordPressLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
