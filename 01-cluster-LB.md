@@ -1,4 +1,4 @@
-Creating just a cluster is ECS is basically it is a form. It asks what type of instances (size) are wanted and how many. If one of the instances die for any reason another one spawns to meet the desired number of instanes.
+Creating just a cluster in ECS is basically a form. It asks what type of instances (size) are wanted and how many. If one of the instances die for any reason another one spawns to meet the desired number of instanes.
 
 However, I could not make the instances pass the health checks and they kept dying and respawning.
 
