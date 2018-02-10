@@ -2,6 +2,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Scalable Wordpress instance
 Resources:
+  #
+  # This defines an EC2 cluster that scales according to demand
+  #
   WordPressAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -27,6 +30,9 @@ Resources:
       AutoScalingRollingUpdate:
         MinInstancesInService: 1
         MaxBatchSize: 1
+    #    
+    # This defines the incoming ports 22 and 80
+    #
   WordpressAutoScalingSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -41,6 +47,9 @@ Resources:
         ToPort: '80'
         IpProtocol: tcp
       VpcId: vpc-e1e73b99
+    #    
+    # This tells the autoscaling group how to launch each instance. It includes installation and configuration for wordpress.
+    #
   WordPressLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Metadata:
@@ -117,6 +126,9 @@ Resources:
         Ref: WordPressLoadBalancer
       Port: 80
       Protocol: HTTP
+  #
+  # creating the security group
+  #
   WordPressIncomingSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
