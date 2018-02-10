@@ -1,0 +1,153 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Scalable Wordpress instance
+Resources:
+  #
+  # creating the security group
+  #
+  WordPressIncomingSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Incoming Security Group for WordPress"
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        Description: "allow port 22"
+        FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+      - CidrIp: 0.0.0.0/0
+        Description: "allow port 80"
+        FromPort: 80
+        ToPort: 80
+        IpProtocol: tcp
+      VpcId: vpc-e1e73b99
+  WordPressAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones:
+      - us-east-1d
+      - us-east-1e
+      - us-east-1f
+      HealthCheckType: EC2
+      TargetGroupARNs:
+         - Ref: WordPressHttpTargetGroup
+      LaunchConfigurationName:
+        Ref: WordPressLaunchConfig
+      DesiredCapacity: '3'
+      MaxSize: '5'
+      MinSize: '1'
+      TerminationPolicies:
+      - NewestInstance
+    CreationPolicy:
+      ResourceSignal:
+        Count: 0
+        Timeout: PT2M
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: 1
+        MaxBatchSize: 1
+  WordpressAutoScalingSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for WP
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: '22'
+        ToPort: '22'
+        IpProtocol: tcp
+      - CidrIp: 0.0.0.0/0
+        FromPort: '80'
+        ToPort: '80'
+        IpProtocol: tcp
+      VpcId: vpc-e1e73b99
+  WordPressLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            01_get_started:
+              command: 'echo hello world'
+    Properties:
+      ImageId: ami-08111162
+      InstanceType: t2.micro
+      KeyName: adam-jones-keypair
+      SecurityGroups:
+      - Ref: WordpressAutoScalingSecurityGroup
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |
+            #!/bin/bash -xe
+            sleep 5
+            curl -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
+            python /tmp/get-pip.py
+            /usr/local/bin/pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+            yum -y install httpd php php-mysql telnet mysql
+            cd /var/www/html
+            /bin/rm -rf ./*
+            curl -sL https://wordpress.org/latest.tar.gz | tar xfz -
+            /bin/mv wordpress/* .
+            chown -R root:root wordpress
+            sed -e 's/wp_/ssb_/g' -e 's/database_name_here/sunshinewp/g' -e 's/username_here/root/g' -e 's/password_here/cornet13/g' -e 's/localhost/capstone-db.cgfvjmb9egc7.us-east-1.rds.amazonaws.com/g' < wp-config-sample.php > wp-config.php
+            # 
+            # https://codex.wordpress.org/Changing_The_Site_URL
+            # 
+            echo "update_option('siteurl','http://new.sunshinebrass.com');" >> /var/www/html/wp-content/themes/twentyseventeen/functions.php
+            echo "update_option('home','http://new.sunshinebrass.com');" >> /var/www/html/wp-content/themes/twentyseventeen/functions.php 
+            echo "define('WP_HOME','http://new.sunshinebrass.com');" >> wp-config.php
+            echo "define('WP_SITEURL','http://new.sunshinebrass.com');" >> wp-config.php
+            #perl -p -i -e's/example.com/new.sunshinebrass.com/g' wp-includes/functions.php
+            chkconfig httpd --level 23456 on && service httpd start
+            #/opt/aws/bin/cfn-init -v --stack wordpress --resource WordPressLaunchConfig --region us-east-1
+            #/opt/aws/bin/cfn-signal -e $? --stack wordpress--resource WordpressAutoScalingGroup --region us-east-1
+
+  WordPressHttpTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: '15'
+      HealthCheckPath: "/"
+      HealthCheckPort: '80'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: vpc-e1e73b99
+#  WordPressLoadBalancerHttpListenerRule:
+#    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+#    Properties:
+#      Actions:
+#      - Type: forward
+#        TargetGroupArn:
+#          Ref: WordPressHttpTargetGroup
+#      Conditions:
+#        - 
+#          Field: 'host-header'
+#          Values:
+#          - "new.sunshinebrass.com"
+#      ListenerArn:
+#        Ref: WordPressHttpListener
+#      Priority: 1
+  # here is the load balacner
+  WordPressLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      SecurityGroups:
+      - Ref: WordPressIncomingSG
+      Subnets:
+      - subnet-a775f4c3
+      - subnet-5155f06e
+      - subnet-cec6f0c2
+  WordPressHttpListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+      - TargetGroupArn:
+         Ref: WordPressHttpTargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: WordPressLoadBalancer
+      Port: 80
+      Protocol: HTTP
