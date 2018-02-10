@@ -81,7 +81,7 @@ Resources:
             echo "define('WP_HOME','http://new.sunshinebrass.com');" >> wp-config.php
             echo "define('WP_SITEURL','http://new.sunshinebrass.com');" >> wp-config.php
             #perl -p -i -e's/example.com/new.sunshinebrass.com/g' wp-includes/functions.php
-            chkconfig httpd --level 23456 on && service httpd start
+            chkconfig httpd --level 2345 on && service httpd start
             #/opt/aws/bin/cfn-init -v --stack wordpress --resource WordPressLaunchConfig --region us-east-1
             #/opt/aws/bin/cfn-signal -e $? --stack wordpress--resource WordpressAutoScalingGroup --region us-east-1
 
