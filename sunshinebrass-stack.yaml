@@ -5,22 +5,6 @@ Resources:
   #
   # creating the security group
   #
-  WordPressIncomingSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: "Incoming Security Group for WordPress"
-      SecurityGroupIngress:
-      - CidrIp: 0.0.0.0/0
-        Description: "allow port 22"
-        FromPort: 22
-        ToPort: 22
-        IpProtocol: tcp
-      - CidrIp: 0.0.0.0/0
-        Description: "allow port 80"
-        FromPort: 80
-        ToPort: 80
-        IpProtocol: tcp
-      VpcId: vpc-e1e73b99
   WordPressAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -151,3 +135,19 @@ Resources:
         Ref: WordPressLoadBalancer
       Port: 80
       Protocol: HTTP
+  WordPressIncomingSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Incoming Security Group for WordPress"
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        Description: "allow port 22"
+        FromPort: 22
+        ToPort: 22
+        IpProtocol: tcp
+      - CidrIp: 0.0.0.0/0
+        Description: "allow port 80"
+        FromPort: 80
+        ToPort: 80
+        IpProtocol: tcp
+      VpcId: vpc-e1e73b99
