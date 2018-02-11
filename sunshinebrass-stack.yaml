@@ -133,6 +133,7 @@ Resources:
       Protocol: HTTP
   #
   # creating the security group
+  # defines the wordpress incoming port 22 and 80
   #
   WordPressIncomingSG:
     Type: AWS::EC2::SecurityGroup
